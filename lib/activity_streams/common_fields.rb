@@ -4,7 +4,7 @@ module ActivityStreams
       klass.class_eval do
         include SAXMachine
         include Feedzirra::FeedEntryUtilities
-        
+
         elements :"activity:object-type", :as => :object_types
         element :id
         element :title, :with => {:type => "text"}

@@ -11,23 +11,23 @@ module ActivityStreams
   class Object
     include CommonFields
   end
-  
+
   class Actor
     include CommonFields
   end
-  
+
   class Target
     include CommonFields
   end
-  
+
   class Context
     include CommonFields
   end
-  
+
   class Feed < Hashie::Dash
     attr_accessor :entries
     attr_accessor :raw_structure
-    
+
     # Creates a new Feed instance by parsing the XML string as an Atom feed with ActivityStreams
     # extensions.
     #
@@ -46,34 +46,34 @@ module ActivityStreams
       res = Feed.new
       res.raw_structure = Feedzirra::Feed.parse(xml)
       res.entries = []
-      
+
       res.raw_structure.entries.each do |entry|
         e = Hashie::Mash.new
-        
+
         # entry atom fields
         e[:id] = entry.id
         e[:published] = entry.published
         e[:title] = entry.title
-        
+
         # verbs
         e.verbs = []
         entry.activity_verbs.each do |verb|
           e.verbs << verb
         end
-        
+
         # actor, target, context
         [:actor, :target, :context].each do |area|
           e[:actor]   ||= Hashie::Mash.new
           e[:target]  ||= Hashie::Mash.new
           e[:context] ||= Hashie::Hash.new
-          
+
           [:id, :links, :object_types, :title, :author, :content].each do |attr|
             unless entry.send("activity_#{area}").nil?
               e.send(:[], area).send(:[]=, attr, entry.send("activity_#{area}").send(attr))
             end
           end
         end
-        
+
         # objects
         e.objects = []
         entry.activity_objects.each do |object|
@@ -83,13 +83,13 @@ module ActivityStreams
           end
           e.objects << o
         end
-        
+
         res.entries << e
       end
-      
+
       return res
     end
-    
+
     # Creates a new Feed instance by parsing the JSON string a list of JSON encoded ActivityStreams
     #
     # @param [String] json string representing a list of JSON encoded ActivityStreams
@@ -98,30 +98,30 @@ module ActivityStreams
       res = Feed.new
       res.raw_structure = JSON.parse(json)
       res.entries = []
-      
+
       res.raw_structure.delete_if { |x| x['activity'].nil? }.each do |item|
         e = Hashie::Mash.new
-        
+
         # id, title, published
         if(entry = item['entry'])
           e.id = entry['id']
           e.title = entry['title']
           e.published = DateTime.parse(entry['published']).feed_utils_to_gm_time rescue nil
         end
-        
+
         if(entry = item['activity'])
           # verbs
           e.verbs = []
           entry['verbs'] && entry['verbs'].each do |verb|
             e.verbs << verb
           end
-        
+
           # actor, target, context
           [:actor, :target, :context].each do |area|
             e[:actor]   ||= Hashie::Mash.new
             e[:target]  ||= Hashie::Mash.new
             e[:context] ||= Hashie::Hash.new
-          
+
             [:id, :links, :object_types, :title, :author, :content].each do |attr|
               unless entry.send(:[], area.to_s).nil?
                 json_attr = attr.to_s.gsub(/\_(\w)/) { $1.upcase }
@@ -129,7 +129,7 @@ module ActivityStreams
               end
             end
           end
-        
+
           # objects
           e.objects = []
           entry['objects'] && entry['objects'].each do |object|
@@ -141,10 +141,10 @@ module ActivityStreams
             e.objects << o
           end
         end
-        
+
         res.entries << e
       end
-      
+
       return res
     end
   end

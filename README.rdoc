@@ -8,7 +8,7 @@ Example usage:
   require 'rubygems'
   require 'activity_streams'
   require 'open-uri'
-  
+
   twitter = 'http://api.cliqset.com/feed/?svcuser=rubenfonseca&feedid=twitternotesposted'
   feed = ActivityStreams::Feed.from_xml(open(twitter).read)
   feed.entries.size #=> 20
@@ -22,7 +22,7 @@ This module is in the very early stages, alpha quality :) Have fun!
 If you have any question, start by looking into the _spec_ directory.
 
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
